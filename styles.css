@@ -1,0 +1,39 @@
+/* Esconde o ícone padrão do Obsidian nos arquivos */
+.nav-file-title .nav-file-title-content::before {
+  display: none !important;
+}
+
+/* Esconde o ícone padrão nas pastas */
+.nav-folder-title .nav-folder-collapse-indicator {
+  display: none !important;
+}
+
+/* Nosso ícone */
+.mat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-right: 5px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.mat-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.nav-file-title:hover .mat-icon svg,
+.nav-folder-title:hover .mat-icon svg {
+  transform: scale(1.15);
+  transition: transform 0.12s ease;
+}
+
+.mat-icon svg {
+  transition: transform 0.12s ease;
+}

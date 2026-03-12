@@ -1,0 +1,170 @@
+import { Plugin } from "obsidian";
+
+const SVG: Record<string, string> = {
+  md: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#7C3AED" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/><path fill="#C4B5FD" d="M13 3.5V9h5.5L13 3.5z"/><path fill="#fff" d="M7 15h2.5v-3l1.5 2 1.5-2v3H15v-6h-1.5l-2 2.5L9 9H7v6z"/></svg>`,
+  js: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="2" fill="#F7DF1E"/><path fill="#000" d="M7.5 17.5c.4.7 1 1.2 2 1.2 1.1 0 1.8-.5 1.8-1.7V12H9.6v5c0 .5-.2.7-.6.7-.4 0-.6-.2-.8-.5zm5.3-.3c.5.8 1.2 1.5 2.5 1.5 1.4 0 2.3-.7 2.3-1.9 0-1.1-.6-1.6-1.8-2.1l-.4-.2c-.6-.3-.9-.4-.9-.8 0-.3.2-.5.6-.5s.6.2.9.6l1.1-1c-.6-.9-1.3-1.2-2.1-1.2-1.3 0-2.1.8-2.1 1.9 0 1.1.6 1.6 1.7 2.1l.4.2c.7.3 1 .5 1 .9 0 .4-.3.6-.8.6s-.9-.3-1.2-.8z"/></svg>`,
+  ts: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="2" fill="#3178C6"/><path fill="#fff" d="M5 12v1.5h3V20h1.8v-6.5H13V12H5zm9.3 0c-1.5 0-2.5.8-2.5 2 0 1.1.7 1.7 1.9 2.2l.4.1c.8.3 1.1.5 1.1 1s-.4.7-.9.7c-.6 0-1-.3-1.3-.9L11.6 18c.5 1 1.4 1.6 2.7 1.6 1.6 0 2.7-.9 2.7-2.2 0-1.2-.7-1.8-2-2.3l-.4-.1c-.7-.3-1-.5-1-.9s.3-.6.7-.6c.4 0 .7.2.9.6z"/></svg>`,
+  py: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#3776AB" d="M12 2C6.5 2 7 4.5 7 4.5V7h5.1v.8H5S2 7.4 2 12s2.5 4.8 2.5 4.8H5.8v-2.3S5.6 12 8 12h7.8s2.2.1 2.2-2.1V6.2S18.4 2 12 2zm-1.4 1.5c.5 0 .9.4.9.9s-.4.9-.9.9-.9-.4-.9-.9.4-.9.9-.9z"/><path fill="#FFC107" d="M12 22c5.5 0 5-2.5 5-2.5V17h-5.1v-.8H19s3 .4 3-4.2-2.5-4.8-2.5-4.8h-1.3v2.3S18.4 12 16 12H8.2S6 11.9 6 14.1v3.7S5.6 22 12 22zm1.4-1.5c-.5 0-.9-.4-.9-.9s.4-.9.9-.9.9.4.9.9-.4.9-.9.9z"/></svg>`,
+  json: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FBC02D" d="M5 3c-1.1 0-2 .9-2 2v3c0 1.1-.9 2-2 2v2c1.1 0 2 .9 2 2v3c0 1.1.9 2 2 2h2v-2H5v-3.5c0-1.1-.5-2-1.3-2.5.8-.5 1.3-1.4 1.3-2.5V5h2V3H5zm14 0h-2v2h2v3.5c0 1.1.5 2 1.3 2.5-.8.5-1.3 1.4-1.3 2.5V19h-2v2h2c1.1 0 2-.9 2-2v-3c0-1.1.9-2 2-2v-2c-1.1 0-2-.9-2-2V5c0-1.1-.9-2-2-2zm-7 11c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1zm-3 0c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1zm6 0c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1z"/></svg>`,
+  css: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#2196F3" d="M5 3l-1.5 16.5L12 21l8.5-1.5L22 3H5zm12.6 5H8.9l.2 2.4h8.3l-.8 7.5L12 19l-4.6-1.1-.3-3.5h2.4l.2 1.8 2.3.6 2.3-.6.3-3H7.5L7 8H17.6l-.2-2.4H6.7L6.5 3H17.8z"/></svg>`,
+  html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#E44D26" d="M5 3l-1.5 16.5L12 21l8.5-1.5L22 3H5zm11.8 13.5L12 18l-4.8-1.5L6.4 9H12v2H8.6l.3 3.1L12 15.1l3.1-.9.3-3.1H12V9h5.6z"/></svg>`,
+  xml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF7043" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-2 9l-2-2 2-2-1-1-3 3 3 3 1-1zm4 0l1 1 3-3-3-3-1 1 2 2-2 2z"/></svg>`,
+  yaml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#EF5350" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-4 9v-5h1.5l1.5 2 1.5-2H15v5h-1.5v-2.7l-1 1.5-1-1.5V18H9z"/></svg>`,
+  yml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#EF5350" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-4 9v-5h1.5l1.5 2 1.5-2H15v5h-1.5v-2.7l-1 1.5-1-1.5V18H9z"/></svg>`,
+  sh: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#66BB6A" d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V7h16v12zM6 9l1.4 1.4L5.8 12l1.6 1.6L6 15l-3-3 3-3zm6 7h-4v-1.5h4V16z"/></svg>`,
+  txt: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#90A4AE" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-3 5h8v1.5H9V14zm0 3h8v1.5H9V17zm0-6h3v1.5H9V11z"/></svg>`,
+  pdf: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#F44336" d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .8-.7 1.5-1.5 1.5H9v2H7.5V7H10c.8 0 1.5.7 1.5 1.5v1zm5 2c0 .8-.7 1.5-1.5 1.5h-2.5V7H15c.8 0 1.5.7 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5z"/><path fill="#EF9A9A" d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>`,
+  env: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#EF5350" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/><path fill="#FFCDD2" d="M9 13h6v1.5H9zm0 2.5h4v1.5H9z"/></svg>`,
+  zip: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FFA726" d="M20 6h-2.18c.07-.31.18-.61.18-.93C18 3.38 16.62 2 14.93 2c-.93 0-1.73.42-2.28 1.07L12 3.77l-.65-.7C10.8 2.42 10 2 9.07 2 7.38 2 6 3.38 6 5.07c0 .32.11.62.18.93H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>`,
+  png: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="2" fill="#43A047"/><circle cx="8.5" cy="8.5" r="1.5" fill="#fff"/><path fill="#fff" d="M21 15l-5-5-4 4-2-2-5 5v2h16z" opacity=".9"/></svg>`,
+  jpg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="2" fill="#2E7D32"/><circle cx="8.5" cy="8.5" r="1.5" fill="#fff"/><path fill="#fff" d="M21 15l-5-5-4 4-2-2-5 5v2h16z" opacity=".9"/></svg>`,
+  jpeg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="2" fill="#2E7D32"/><circle cx="8.5" cy="8.5" r="1.5" fill="#fff"/><path fill="#fff" d="M21 15l-5-5-4 4-2-2-5 5v2h16z" opacity=".9"/></svg>`,
+  gif: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="2" fill="#7B1FA2"/><circle cx="8.5" cy="8.5" r="1.5" fill="#fff"/><path fill="#fff" d="M21 15l-5-5-4 4-2-2-5 5v2h16z" opacity=".9"/><path fill="#CE93D8" d="M18 4h2v2h-2zm0 4h2v2h-2z"/></svg>`,
+  webp: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="2" fill="#00897B"/><circle cx="8.5" cy="8.5" r="1.5" fill="#fff"/><path fill="#fff" d="M21 15l-5-5-4 4-2-2-5 5v2h16z" opacity=".9"/></svg>`,
+  svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="2" fill="#FFB300"/><path fill="#fff" d="M12 6a6 6 0 100 12A6 6 0 0012 6zm0 2a4 4 0 110 8 4 4 0 010-8z" opacity=".9"/><circle cx="12" cy="12" r="2" fill="#fff"/></svg>`,
+  ico: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="2" fill="#FF8F00"/><circle cx="8.5" cy="8.5" r="1.5" fill="#fff"/><path fill="#fff" d="M21 15l-5-5-4 4-2-2-5 5v2h16z" opacity=".9"/></svg>`,
+  default_file: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#90A4AE" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>`,
+  folder: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#90A4AE" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><path fill="#B0BEC5" d="M4 10h16v8H4z" opacity=".3"/></svg>`,
+  "folder-src": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1565C0" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><path fill="#fff" d="M7 13l1.4-1.4L7 10.2l1-1L11 12l-3 3zm4 2h4v-1.5h-4z" opacity=".9"/></svg>`,
+  "folder-assets": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#2E7D32" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><path fill="#fff" d="M7 11h10v1.5H7zm0 2.5h7V15H7z" opacity=".9"/></svg>`,
+  "folder-images": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#6A1B9A" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><circle cx="9" cy="11" r="1.2" fill="#fff" opacity=".9"/><path fill="#fff" d="M19 16l-4-4-3 3-1.5-1.5L7 16z" opacity=".9"/></svg>`,
+  "folder-docs": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#E65100" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><path fill="#fff" d="M8 10.5h8V12H8zm0 2.5h8V14.5H8zm0 2.5h5V17H8z" opacity=".9"/></svg>`,
+  "folder-notes": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#006064" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><path fill="#fff" d="M8 10.5h8V12H8zm0 2.5h8V14.5H8zm0 2.5h5V17H8z" opacity=".9"/></svg>`,
+  "folder-projects": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#B71C1C" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><rect x="8" y="10" width="3" height="6" rx="0.5" fill="#fff" opacity=".9"/><rect x="12.5" y="12" width="3" height="4" rx="0.5" fill="#fff" opacity=".9"/></svg>`,
+  "folder-templates": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#880E4F" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><rect x="8" y="10" width="8" height="1.5" rx="0.5" fill="#fff" opacity=".9"/><rect x="8" y="13" width="5" height="1.5" rx="0.5" fill="#fff" opacity=".7"/><rect x="8" y="15.5" width="6.5" height="1.5" rx="0.5" fill="#fff" opacity=".7"/></svg>`,
+  "folder-scripts": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#F57F17" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><path fill="#fff" d="M8 13l1.5-1.5L8 10l1-1 2.5 2.5L9 14zm4 2h4v-1.5h-4z" opacity=".9"/></svg>`,
+  "folder-config": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#37474F" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><path fill="#fff" d="M13.5 10.5l.8.5-.8.5v1l1.5-.9 1.5.9v-1l-.8-.5.8-.5v-1L15 10l-1.5-.5zm-5 0l.8.5-.8.5v1l1.5-.9 1.5.9v-1l-.8-.5.8-.5v-1L10 10l-1.5-.5z" opacity=".9"/></svg>`,
+  "folder-archive": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4E342E" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><rect x="7" y="10" width="10" height="1.5" rx="0.5" fill="#fff" opacity=".9"/><rect x="9" y="12.5" width="6" height="3.5" rx="0.5" fill="#fff" opacity=".7"/><rect x="10.5" y="13.5" width="3" height="1.5" rx="0.5" fill="#BCAAA4" opacity=".9"/></svg>`,
+  "folder-git": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#BF360C" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/><path fill="#fff" d="M17.5 10.5l-1-1-4.5 4.5-2-2-1 1 3 3z" opacity=".9"/></svg>`,
+};
+
+const FOLDER_MAP: Record<string, string> = {
+  src: "folder-src",
+  source: "folder-src",
+  assets: "folder-assets",
+  asset: "folder-assets",
+  images: "folder-images",
+  image: "folder-images",
+  img: "folder-images",
+  docs: "folder-docs",
+  documents: "folder-docs",
+  notes: "folder-notes",
+  note: "folder-notes",
+  projects: "folder-projects",
+  project: "folder-projects",
+  templates: "folder-templates",
+  template: "folder-templates",
+  scripts: "folder-scripts",
+  script: "folder-scripts",
+  config: "folder-config",
+  configs: "folder-config",
+  settings: "folder-config",
+  archive: "folder-archive",
+  archives: "folder-archive",
+  ".git": "folder-git",
+  git: "folder-git",
+};
+
+export default class MaterialIconsPlugin extends Plugin {
+  private observer: MutationObserver | null = null;
+  private debounceTimer: number | null = null;
+
+  async onload() {
+    console.log("[MaterialIcons] Plugin loaded");
+    this.app.workspace.onLayoutReady(() => {
+      // Limpa TODOS os ícones velhos antes de reaplicar
+      document.querySelectorAll(".mat-icon").forEach((el) => el.remove());
+      this.retryApply(5, 300);
+    });
+    this.registerEvent(this.app.vault.on("create", () => this.scheduleApply()));
+    this.registerEvent(this.app.vault.on("rename", () => this.scheduleApply()));
+    this.registerEvent(this.app.vault.on("delete", () => this.scheduleApply()));
+    this.registerEvent(
+      this.app.workspace.on("layout-change", () => this.scheduleApply()),
+    );
+    this.startSafeObserver();
+  }
+
+  onunload() {
+    console.log("[MaterialIcons] Plugin unloaded");
+    this.observer?.disconnect();
+    this.observer = null;
+    document.querySelectorAll(".mat-icon").forEach((el) => el.remove());
+  }
+
+  private retryApply(times: number, delay: number) {
+    this.applyIcons();
+    if (times > 1) {
+      window.setTimeout(() => this.retryApply(times - 1, delay), delay);
+    }
+  }
+
+  private scheduleApply() {
+    if (this.debounceTimer) window.clearTimeout(this.debounceTimer);
+    this.debounceTimer = window.setTimeout(() => this.applyIcons(), 200);
+  }
+
+  private applyIcons() {
+    let applied = 0;
+
+    document.querySelectorAll<HTMLElement>(".nav-file-title").forEach((el) => {
+      el.querySelector(".mat-icon")?.remove();
+      const nameEl = el.querySelector(".nav-file-title-content");
+      if (!nameEl) return;
+
+      // Pega o caminho real do arquivo via atributo do Obsidian
+      const filePath = el.getAttribute("data-path") ?? "";
+      const realExt = filePath.includes(".")
+        ? filePath.split(".").pop()!.toLowerCase()
+        : "md";
+
+      this.inject(el, SVG[realExt] ?? SVG["default_file"]);
+      applied++;
+    });
+
+    document
+      .querySelectorAll<HTMLElement>(".nav-folder-title")
+      .forEach((el) => {
+        el.querySelector(".mat-icon")?.remove();
+        const nameEl = el.querySelector(".nav-folder-title-content");
+        if (!nameEl) return;
+        const name = nameEl.textContent?.trim() ?? "";
+        const key = FOLDER_MAP[name.toLowerCase()] ?? "folder";
+        this.inject(el, SVG[key] ?? SVG["folder"]);
+        applied++;
+      });
+
+    console.log(`[MaterialIcons] Applied ${applied} icons`);
+  }
+
+  private inject(el: HTMLElement, svgStr: string) {
+    const span = document.createElement("span");
+    span.className = "mat-icon";
+    span.setAttribute("aria-hidden", "true");
+    span.innerHTML = svgStr;
+    el.prepend(span);
+  }
+
+  private startSafeObserver() {
+    const container = document.querySelector(".nav-files-container");
+    if (!container) {
+      window.setTimeout(() => this.startSafeObserver(), 1000);
+      return;
+    }
+    this.observer = new MutationObserver((mutations) => {
+      const hasNewNodes = mutations.some(
+        (m) => m.type === "childList" && m.addedNodes.length > 0,
+      );
+      if (!hasNewNodes) return;
+      this.observer?.disconnect();
+      this.scheduleApply();
+      window.setTimeout(() => {
+        if (this.observer && container.isConnected) {
+          this.observer.observe(container, { childList: true, subtree: true });
+        }
+      }, 500);
+    });
+    this.observer.observe(container, { childList: true, subtree: true });
+    console.log("[MaterialIcons] Observer started");
+  }
+}

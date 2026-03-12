@@ -1,0 +1,10 @@
+{
+  "id": "material-icons-obsidian",
+  "name": "Material Icons",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "Adds Material Theme icons to files and folders in the file explorer, just like VS Code's Material Icon Theme.",
+  "author": "Você",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
