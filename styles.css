@@ -1,63 +1,47 @@
 /* ── Material Icons for Obsidian ── */
 
-/* Container do ícone — alinhado ao baseline do texto */
 .mat-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1em;
-  height: 1em;
-  min-width: 14px;
-  min-height: 14px;
-  max-width: 16px;
-  max-height: 16px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
   margin-right: 6px;
-  /* Alinha verticalmente com o texto sem deslocar */
-  vertical-align: middle;
+  /* Alinhamento vertical com o texto */
   position: relative;
-  top: -0.05em;
+  top: 0;
+  vertical-align: middle;
+  line-height: 1;
 }
 
-/* SVG ocupa todo o container */
 .mat-icon svg {
-  width: 100%;
-  height: 100%;
+  width: 16px;
+  height: 16px;
   display: block;
-  /* Garante que o SVG não ultrapasse o container */
-  overflow: visible;
 }
 
-/* ── Itens de arquivo ── */
-.nav-file-title {
-  display: flex;
-  align-items: center;
-}
-
-.nav-file-title-content {
-  display: flex;
-  align-items: center;
-  gap: 0;
-}
-
-/* ── Itens de pasta ── */
+/* Faz o título do arquivo ser um flex container
+   para alinhar ícone e texto no centro */
+.nav-file-title,
 .nav-folder-title {
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  align-items: center !important;
 }
 
+.nav-file-title-content,
 .nav-folder-title-content {
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  align-items: center !important;
+  line-height: 1.4;
 }
 
-/* Esconde a seta de colapso padrão do Obsidian
-   para não duplicar com nosso ícone */
+/* Esconde a seta de colapso padrão */
 .nav-folder-collapse-indicator {
   display: none !important;
 }
 
-/* ── Hover: leve zoom suave ── */
+/* Hover suave */
 .mat-icon svg {
   transition: transform 0.12s ease;
   transform-origin: center;
@@ -66,9 +50,4 @@
 .nav-file-title:hover .mat-icon svg,
 .nav-folder-title:hover .mat-icon svg {
   transform: scale(1.18);
-}
-
-/* ── Compatibilidade com temas que usam font-size menor ── */
-.nav-files-container .mat-icon {
-  font-size: inherit;
 }
