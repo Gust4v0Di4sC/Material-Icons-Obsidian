@@ -91,6 +91,11 @@ var FOLDER_MAP = {
   ".git": "folder-git",
   git: "folder-git"
 };
+function createSvgElement(svgStr) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(svgStr, "image/svg+xml");
+  return doc.documentElement;
+}
 var MaterialIconsPlugin = class extends import_obsidian.Plugin {
   constructor() {
     super(...arguments);
@@ -98,7 +103,7 @@ var MaterialIconsPlugin = class extends import_obsidian.Plugin {
     this.debounceTimer = null;
   }
   async onload() {
-    console.log("[MaterialIcons] Plugin loaded");
+    await Promise.resolve();
     this.app.workspace.onLayoutReady(() => {
       document.querySelectorAll(".mat-icon").forEach((el) => el.remove());
       this.retryApply(5, 300);
@@ -113,7 +118,6 @@ var MaterialIconsPlugin = class extends import_obsidian.Plugin {
   }
   onunload() {
     var _a;
-    console.log("[MaterialIcons] Plugin unloaded");
     (_a = this.observer) == null ? void 0 : _a.disconnect();
     this.observer = null;
     document.querySelectorAll(".mat-icon").forEach((el) => el.remove());
@@ -130,7 +134,6 @@ var MaterialIconsPlugin = class extends import_obsidian.Plugin {
     this.debounceTimer = window.setTimeout(() => this.applyIcons(), 200);
   }
   applyIcons() {
-    let applied = 0;
     document.querySelectorAll(".nav-file-title").forEach((el) => {
       var _a, _b, _c;
       (_a = el.querySelector(".mat-icon")) == null ? void 0 : _a.remove();
@@ -140,7 +143,6 @@ var MaterialIconsPlugin = class extends import_obsidian.Plugin {
       const filePath = (_b = el.getAttribute("data-path")) != null ? _b : "";
       const realExt = filePath.includes(".") ? filePath.split(".").pop().toLowerCase() : "md";
       this.inject(el, (_c = SVG[realExt]) != null ? _c : SVG["default_file"]);
-      applied++;
     });
     document.querySelectorAll(".nav-folder-title").forEach((el) => {
       var _a, _b, _c, _d, _e;
@@ -151,15 +153,14 @@ var MaterialIconsPlugin = class extends import_obsidian.Plugin {
       const name = (_c = (_b = nameEl.textContent) == null ? void 0 : _b.trim()) != null ? _c : "";
       const key = (_d = FOLDER_MAP[name.toLowerCase()]) != null ? _d : "folder";
       this.inject(el, (_e = SVG[key]) != null ? _e : SVG["folder"]);
-      applied++;
     });
-    console.log(`[MaterialIcons] Applied ${applied} icons`);
   }
   inject(el, svgStr) {
     const span = document.createElement("span");
     span.className = "mat-icon";
     span.setAttribute("aria-hidden", "true");
-    span.innerHTML = svgStr;
+    const svgEl = createSvgElement(svgStr);
+    span.appendChild(svgEl);
     el.prepend(span);
   }
   startSafeObserver() {
@@ -184,6 +185,5 @@ var MaterialIconsPlugin = class extends import_obsidian.Plugin {
       }, 500);
     });
     this.observer.observe(container, { childList: true, subtree: true });
-    console.log("[MaterialIcons] Observer started");
   }
 };

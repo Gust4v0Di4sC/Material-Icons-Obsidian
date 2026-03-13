@@ -1,7 +1,7 @@
 {
   "id": "material-icons",
   "name": "Material Icons",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "1.0.0",
   "description": "Material Theme icons for files and folders in the file explorer.",
   "author": "Gustavo Dias",
