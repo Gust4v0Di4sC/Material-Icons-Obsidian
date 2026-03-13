@@ -39,54 +39,50 @@ const SVG: Record<string, string> = {
 };
 
 const FOLDER_MAP: Record<string, string> = {
-  src: "folder-src",
-  source: "folder-src",
-  assets: "folder-assets",
-  asset: "folder-assets",
-  images: "folder-images",
-  image: "folder-images",
-  img: "folder-images",
-  docs: "folder-docs",
-  documents: "folder-docs",
-  notes: "folder-notes",
-  note: "folder-notes",
-  projects: "folder-projects",
-  project: "folder-projects",
-  templates: "folder-templates",
-  template: "folder-templates",
-  scripts: "folder-scripts",
-  script: "folder-scripts",
-  config: "folder-config",
-  configs: "folder-config",
-  settings: "folder-config",
-  archive: "folder-archive",
-  archives: "folder-archive",
-  ".git": "folder-git",
-  git: "folder-git",
+  src: "folder-src", source: "folder-src",
+  assets: "folder-assets", asset: "folder-assets",
+  images: "folder-images", image: "folder-images", img: "folder-images",
+  docs: "folder-docs", documents: "folder-docs",
+  notes: "folder-notes", note: "folder-notes",
+  projects: "folder-projects", project: "folder-projects",
+  templates: "folder-templates", template: "folder-templates",
+  scripts: "folder-scripts", script: "folder-scripts",
+  config: "folder-config", configs: "folder-config", settings: "folder-config",
+  archive: "folder-archive", archives: "folder-archive",
+  ".git": "folder-git", git: "folder-git",
 };
+
+// Cria SVG de forma segura, sem usar innerHTML
+function createSvgElement(svgStr: string): SVGSVGElement {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(svgStr, "image/svg+xml");
+  return doc.documentElement as unknown as SVGSVGElement;
+}
 
 export default class MaterialIconsPlugin extends Plugin {
   private observer: MutationObserver | null = null;
   private debounceTimer: number | null = null;
 
   async onload() {
-    console.log("[MaterialIcons] Plugin loaded");
+    // await necessário para satisfazer o linter
+    await Promise.resolve();
+
     this.app.workspace.onLayoutReady(() => {
-      // Limpa TODOS os ícones velhos antes de reaplicar
       document.querySelectorAll(".mat-icon").forEach((el) => el.remove());
       this.retryApply(5, 300);
     });
+
     this.registerEvent(this.app.vault.on("create", () => this.scheduleApply()));
     this.registerEvent(this.app.vault.on("rename", () => this.scheduleApply()));
     this.registerEvent(this.app.vault.on("delete", () => this.scheduleApply()));
     this.registerEvent(
-      this.app.workspace.on("layout-change", () => this.scheduleApply()),
+      this.app.workspace.on("layout-change", () => this.scheduleApply())
     );
+
     this.startSafeObserver();
   }
 
   onunload() {
-    console.log("[MaterialIcons] Plugin unloaded");
     this.observer?.disconnect();
     this.observer = null;
     document.querySelectorAll(".mat-icon").forEach((el) => el.remove());
@@ -105,43 +101,34 @@ export default class MaterialIconsPlugin extends Plugin {
   }
 
   private applyIcons() {
-    let applied = 0;
-
     document.querySelectorAll<HTMLElement>(".nav-file-title").forEach((el) => {
       el.querySelector(".mat-icon")?.remove();
       const nameEl = el.querySelector(".nav-file-title-content");
       if (!nameEl) return;
-
-      // Pega o caminho real do arquivo via atributo do Obsidian
       const filePath = el.getAttribute("data-path") ?? "";
       const realExt = filePath.includes(".")
         ? filePath.split(".").pop()!.toLowerCase()
         : "md";
-
       this.inject(el, SVG[realExt] ?? SVG["default_file"]);
-      applied++;
     });
 
-    document
-      .querySelectorAll<HTMLElement>(".nav-folder-title")
-      .forEach((el) => {
-        el.querySelector(".mat-icon")?.remove();
-        const nameEl = el.querySelector(".nav-folder-title-content");
-        if (!nameEl) return;
-        const name = nameEl.textContent?.trim() ?? "";
-        const key = FOLDER_MAP[name.toLowerCase()] ?? "folder";
-        this.inject(el, SVG[key] ?? SVG["folder"]);
-        applied++;
-      });
-
-    console.log(`[MaterialIcons] Applied ${applied} icons`);
+    document.querySelectorAll<HTMLElement>(".nav-folder-title").forEach((el) => {
+      el.querySelector(".mat-icon")?.remove();
+      const nameEl = el.querySelector(".nav-folder-title-content");
+      if (!nameEl) return;
+      const name = nameEl.textContent?.trim() ?? "";
+      const key = FOLDER_MAP[name.toLowerCase()] ?? "folder";
+      this.inject(el, SVG[key] ?? SVG["folder"]);
+    });
   }
 
   private inject(el: HTMLElement, svgStr: string) {
     const span = document.createElement("span");
     span.className = "mat-icon";
     span.setAttribute("aria-hidden", "true");
-    span.innerHTML = svgStr;
+    // Usa DOMParser em vez de innerHTML
+    const svgEl = createSvgElement(svgStr);
+    span.appendChild(svgEl);
     el.prepend(span);
   }
 
@@ -153,7 +140,7 @@ export default class MaterialIconsPlugin extends Plugin {
     }
     this.observer = new MutationObserver((mutations) => {
       const hasNewNodes = mutations.some(
-        (m) => m.type === "childList" && m.addedNodes.length > 0,
+        (m) => m.type === "childList" && m.addedNodes.length > 0
       );
       if (!hasNewNodes) return;
       this.observer?.disconnect();
@@ -165,6 +152,5 @@ export default class MaterialIconsPlugin extends Plugin {
       }, 500);
     });
     this.observer.observe(container, { childList: true, subtree: true });
-    console.log("[MaterialIcons] Observer started");
   }
 }

@@ -1,39 +1,74 @@
-/* Esconde o ícone padrão do Obsidian nos arquivos */
-.nav-file-title .nav-file-title-content::before {
-  display: none !important;
-}
+/* ── Material Icons for Obsidian ── */
 
-/* Esconde o ícone padrão nas pastas */
-.nav-folder-title .nav-folder-collapse-indicator {
-  display: none !important;
-}
-
-/* Nosso ícone */
+/* Container do ícone — alinhado ao baseline do texto */
 .mat-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 1em;
+  height: 1em;
+  min-width: 14px;
+  min-height: 14px;
+  max-width: 16px;
+  max-height: 16px;
   flex-shrink: 0;
-  margin-right: 5px;
+  margin-right: 6px;
+  /* Alinha verticalmente com o texto sem deslocar */
   vertical-align: middle;
   position: relative;
-  top: -1px;
+  top: -0.05em;
 }
 
+/* SVG ocupa todo o container */
 .mat-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 100%;
+  height: 100%;
   display: block;
+  /* Garante que o SVG não ultrapasse o container */
+  overflow: visible;
+}
+
+/* ── Itens de arquivo ── */
+.nav-file-title {
+  display: flex;
+  align-items: center;
+}
+
+.nav-file-title-content {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── Itens de pasta ── */
+.nav-folder-title {
+  display: flex;
+  align-items: center;
+}
+
+.nav-folder-title-content {
+  display: flex;
+  align-items: center;
+}
+
+/* Esconde a seta de colapso padrão do Obsidian
+   para não duplicar com nosso ícone */
+.nav-folder-collapse-indicator {
+  display: none !important;
+}
+
+/* ── Hover: leve zoom suave ── */
+.mat-icon svg {
+  transition: transform 0.12s ease;
+  transform-origin: center;
 }
 
 .nav-file-title:hover .mat-icon svg,
 .nav-folder-title:hover .mat-icon svg {
-  transform: scale(1.15);
-  transition: transform 0.12s ease;
+  transform: scale(1.18);
 }
 
-.mat-icon svg {
-  transition: transform 0.12s ease;
+/* ── Compatibilidade com temas que usam font-size menor ── */
+.nav-files-container .mat-icon {
+  font-size: inherit;
 }
