@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎨 Material Icons for Obsidian
+# Material Icons
 
 **Ícones coloridos no estilo Material Theme para arquivos e pastas do Obsidian.**
 
