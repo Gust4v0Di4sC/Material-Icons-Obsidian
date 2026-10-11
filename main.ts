@@ -62,13 +62,12 @@ function createSvgElement(svgStr: string): SVGSVGElement {
 export default class MaterialIconsPlugin extends Plugin {
   private observer: MutationObserver | null = null;
   private debounceTimer: number | null = null;
+  private retryTimers = new Set<number>();
+  private unloaded = false;
 
-  async onload() {
-    // await necessário para satisfazer o linter
-    await Promise.resolve();
-
+  onload() {
     this.app.workspace.onLayoutReady(() => {
-      document.querySelectorAll(".mat-icon").forEach((el) => el.remove());
+      this.clearIcons();
       this.retryApply(5, 300);
     });
 
@@ -83,74 +82,132 @@ export default class MaterialIconsPlugin extends Plugin {
   }
 
   onunload() {
+    this.unloaded = true;
     this.observer?.disconnect();
     this.observer = null;
-    document.querySelectorAll(".mat-icon").forEach((el) => el.remove());
+    if (this.debounceTimer !== null) {
+      activeWindow.clearTimeout(this.debounceTimer);
+    }
+    this.debounceTimer = null;
+    this.retryTimers.forEach((timer) => activeWindow.clearTimeout(timer));
+    this.retryTimers.clear();
+    this.clearIcons();
   }
 
   private retryApply(times: number, delay: number) {
+    if (this.unloaded) return;
     this.applyIcons();
     if (times > 1) {
-      window.setTimeout(() => this.retryApply(times - 1, delay), delay);
+      const timer = activeWindow.setTimeout(() => {
+        this.retryTimers.delete(timer);
+        this.retryApply(times - 1, delay);
+      }, delay);
+      this.retryTimers.add(timer);
     }
   }
 
   private scheduleApply() {
-    if (this.debounceTimer) window.clearTimeout(this.debounceTimer);
-    this.debounceTimer = window.setTimeout(() => this.applyIcons(), 200);
+    if (this.unloaded) return;
+    if (this.debounceTimer !== null) {
+      activeWindow.clearTimeout(this.debounceTimer);
+    }
+    this.debounceTimer = activeWindow.setTimeout(() => {
+      this.debounceTimer = null;
+      this.applyIcons();
+    }, 200);
   }
 
   private applyIcons() {
-    document.querySelectorAll<HTMLElement>(".nav-file-title").forEach((el) => {
-      el.querySelector(".mat-icon")?.remove();
-      const nameEl = el.querySelector(".nav-file-title-content");
-      if (!nameEl) return;
-      const filePath = el.getAttribute("data-path") ?? "";
-      const realExt = filePath.includes(".")
-        ? filePath.split(".").pop()!.toLowerCase()
-        : "md";
-      this.inject(el, SVG[realExt] ?? SVG["default_file"]);
-    });
+    activeDocument
+      .querySelectorAll<HTMLElement>(".nav-file-title")
+      .forEach((el) => {
+        el.querySelector(".mat-icon")?.remove();
+        const nameEl = el.querySelector(".nav-file-title-content");
+        if (!nameEl) return;
+        const filePath = el.getAttribute("data-path") ?? "";
+        const realExt = filePath.includes(".")
+          ? filePath.split(".").pop()!.toLowerCase()
+          : "md";
+        this.inject(el, SVG[realExt] ?? SVG["default_file"]);
+      });
 
-    document.querySelectorAll<HTMLElement>(".nav-folder-title").forEach((el) => {
-      el.querySelector(".mat-icon")?.remove();
-      const nameEl = el.querySelector(".nav-folder-title-content");
-      if (!nameEl) return;
-      const name = nameEl.textContent?.trim() ?? "";
-      const key = FOLDER_MAP[name.toLowerCase()] ?? "folder";
-      this.inject(el, SVG[key] ?? SVG["folder"]);
-    });
+    activeDocument
+      .querySelectorAll<HTMLElement>(".nav-folder-title")
+      .forEach((el) => {
+        el.querySelector(".mat-icon")?.remove();
+        const nameEl = el.querySelector(".nav-folder-title-content");
+        if (!nameEl) return;
+        const name = nameEl.textContent?.trim() ?? "";
+        const key = FOLDER_MAP[name.toLowerCase()] ?? "folder";
+        this.inject(el, SVG[key] ?? SVG["folder"]);
+      });
   }
 
   private inject(el: HTMLElement, svgStr: string) {
-    const span = document.createElement("span");
-    span.className = "mat-icon";
-    span.setAttribute("aria-hidden", "true");
-    // Usa DOMParser em vez de innerHTML
+    const span = createSpan({
+      cls: "mat-icon",
+      attr: { "aria-hidden": "true" },
+    });
     const svgEl = createSvgElement(svgStr);
     span.appendChild(svgEl);
+    el.classList.add("mat-icon-row");
+
+    // Reutiliza o espaço do ícone nativo para preservar os eventos do
+    // Obsidian (como expandir/recolher pastas) sem exibir dois ícones.
+    const nativeIcon = el.querySelector<HTMLElement>(
+      ".nav-file-icon, " +
+        ".tree-item-icon, " +
+        ".collapse-icon, " +
+        ".nav-folder-collapse-indicator"
+    );
+
+    if (nativeIcon) {
+      nativeIcon.classList.add("mat-icon-host");
+      nativeIcon.prepend(span);
+      return;
+    }
+
+    // Compatibilidade com versões/temas sem um contêiner de ícone próprio.
     el.prepend(span);
   }
 
+  private clearIcons() {
+    activeDocument.querySelectorAll(".mat-icon").forEach((el) => el.remove());
+    activeDocument
+      .querySelectorAll(".mat-icon-host")
+      .forEach((el) => el.classList.remove("mat-icon-host"));
+    activeDocument
+      .querySelectorAll(".mat-icon-row")
+      .forEach((el) => el.classList.remove("mat-icon-row"));
+  }
+
   private startSafeObserver() {
-    const container = document.querySelector(".nav-files-container");
+    if (this.unloaded) return;
+    const container = activeDocument.querySelector(".nav-files-container");
     if (!container) {
-      window.setTimeout(() => this.startSafeObserver(), 1000);
+      const timer = activeWindow.setTimeout(() => {
+        this.retryTimers.delete(timer);
+        this.startSafeObserver();
+      }, 1000);
+      this.retryTimers.add(timer);
       return;
     }
-    this.observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver((mutations) => {
       const hasNewNodes = mutations.some(
         (m) => m.type === "childList" && m.addedNodes.length > 0
       );
       if (!hasNewNodes) return;
       this.observer?.disconnect();
       this.scheduleApply();
-      window.setTimeout(() => {
+      const timer = activeWindow.setTimeout(() => {
+        this.retryTimers.delete(timer);
         if (this.observer && container.isConnected) {
           this.observer.observe(container, { childList: true, subtree: true });
         }
       }, 500);
+      this.retryTimers.add(timer);
     });
-    this.observer.observe(container, { childList: true, subtree: true });
+    this.observer = observer;
+    observer.observe(container, { childList: true, subtree: true });
   }
 }

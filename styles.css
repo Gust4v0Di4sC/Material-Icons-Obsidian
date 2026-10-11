@@ -19,32 +19,41 @@
   width: 16px;
   height: 16px;
   display: block;
-}
-
-/* Faz o título do arquivo ser um flex container
-   para alinhar ícone e texto no centro */
-.nav-file-title,
-.nav-folder-title {
-  display: flex !important;
-  align-items: center !important;
-}
-
-.nav-file-title-content,
-.nav-folder-title-content {
-  display: flex !important;
-  align-items: center !important;
-  line-height: 1.4;
-}
-
-/* Esconde a seta de colapso padrão */
-.nav-folder-collapse-indicator {
-  display: none !important;
-}
-
-/* Hover suave */
-.mat-icon svg {
   transition: transform 0.12s ease;
   transform-origin: center;
+}
+
+.nav-file-title.mat-icon-row .mat-icon-host,
+.nav-folder-title.mat-icon-row .mat-icon-host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-file-title.mat-icon-row .mat-icon-host::before,
+.nav-folder-title.mat-icon-row .mat-icon-host::before,
+.nav-file-title.mat-icon-row .mat-icon-host > :not(.mat-icon),
+.nav-folder-title.mat-icon-row .mat-icon-host > :not(.mat-icon) {
+  display: none;
+  content: none;
+}
+
+.mat-icon-row .mat-icon-host > .mat-icon {
+  position: static;
+  margin-right: 0;
+}
+
+.nav-file-title.mat-icon-row,
+.nav-folder-title.mat-icon-row {
+  display: flex;
+  align-items: center;
+}
+
+.mat-icon-row > .nav-file-title-content,
+.mat-icon-row > .nav-folder-title-content {
+  display: flex;
+  align-items: center;
+  line-height: 1.4;
 }
 
 .nav-file-title:hover .mat-icon svg,
