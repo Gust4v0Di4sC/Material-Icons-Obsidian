@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Gust4v0Di4sC/Material-Icons-Obsidian/security/advisories/new
+    about: Report vulnerabilities privately.
+  - name: Support guide
+    url: https://github.com/Gust4v0Di4sC/Material-Icons-Obsidian/blob/main/SUPPORT.md
+    about: Review troubleshooting and support options.
