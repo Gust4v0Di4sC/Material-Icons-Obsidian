@@ -1,6 +1,6 @@
 {
   "name": "material-icons-obsidian",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Material Theme Icons for Obsidian file explorer",
   "main": "main.js",
   "scripts": {
@@ -9,9 +9,24 @@
     "lint": "eslint .",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "material-icons"
+  ],
+  "author": "Gustavo Dias",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gust4v0Di4sC/Material-Icons-Obsidian.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Gust4v0Di4sC/Material-Icons-Obsidian/issues"
+  },
+  "homepage": "https://github.com/Gust4v0Di4sC/Material-Icons-Obsidian#readme",
+  "engines": {
+    "node": ">=20"
+  },
   "overrides": {
     "obsidian": "$obsidian"
   },

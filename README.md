@@ -4,7 +4,7 @@
 
 **Ícones coloridos no estilo Material Theme para arquivos e pastas do Obsidian.**
 
-[![Version](https://img.shields.io/badge/version-1.0.1-7c3aed)](https://github.com/Gust4v0Di4sC/Material-Icons-Obsidian/releases)
+[![Version](https://img.shields.io/badge/version-1.0.2-7c3aed)](https://github.com/Gust4v0Di4sC/Material-Icons-Obsidian/releases)
 [![Obsidian](https://img.shields.io/badge/Obsidian-1.0%2B-7c3aed?logo=obsidian&logoColor=white)](https://obsidian.md/)
 [![CI](https://github.com/Gust4v0Di4sC/Material-Icons-Obsidian/actions/workflows/ci.yml/badge.svg)](https://github.com/Gust4v0Di4sC/Material-Icons-Obsidian/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-2ea44f)](LICENSE)

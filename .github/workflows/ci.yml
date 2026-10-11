@@ -16,5 +16,6 @@ jobs:
       - uses: actions/checkout@v7
       - uses: obsidianmd/obsidian-workflows@v1
         with:
+          build: npm run build
           scanner-lint: true
           strict: true
