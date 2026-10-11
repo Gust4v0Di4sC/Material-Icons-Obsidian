@@ -86,10 +86,10 @@ export default class MaterialIconsPlugin extends Plugin {
     this.observer?.disconnect();
     this.observer = null;
     if (this.debounceTimer !== null) {
-      activeWindow.clearTimeout(this.debounceTimer);
+      window.clearTimeout(this.debounceTimer);
     }
     this.debounceTimer = null;
-    this.retryTimers.forEach((timer) => activeWindow.clearTimeout(timer));
+    this.retryTimers.forEach((timer) => window.clearTimeout(timer));
     this.retryTimers.clear();
     this.clearIcons();
   }
@@ -98,7 +98,7 @@ export default class MaterialIconsPlugin extends Plugin {
     if (this.unloaded) return;
     this.applyIcons();
     if (times > 1) {
-      const timer = activeWindow.setTimeout(() => {
+      const timer = window.setTimeout(() => {
         this.retryTimers.delete(timer);
         this.retryApply(times - 1, delay);
       }, delay);
@@ -109,9 +109,9 @@ export default class MaterialIconsPlugin extends Plugin {
   private scheduleApply() {
     if (this.unloaded) return;
     if (this.debounceTimer !== null) {
-      activeWindow.clearTimeout(this.debounceTimer);
+      window.clearTimeout(this.debounceTimer);
     }
-    this.debounceTimer = activeWindow.setTimeout(() => {
+    this.debounceTimer = window.setTimeout(() => {
       this.debounceTimer = null;
       this.applyIcons();
     }, 200);
@@ -128,7 +128,8 @@ export default class MaterialIconsPlugin extends Plugin {
         const realExt = filePath.includes(".")
           ? filePath.split(".").pop()!.toLowerCase()
           : "md";
-        this.inject(el, SVG[realExt] ?? SVG["default_file"]);
+        const icon = SVG[realExt] ?? SVG["default_file"];
+        if (icon) this.inject(el, icon);
       });
 
     activeDocument
@@ -139,7 +140,8 @@ export default class MaterialIconsPlugin extends Plugin {
         if (!nameEl) return;
         const name = nameEl.textContent?.trim() ?? "";
         const key = FOLDER_MAP[name.toLowerCase()] ?? "folder";
-        this.inject(el, SVG[key] ?? SVG["folder"]);
+        const icon = SVG[key] ?? SVG["folder"];
+        if (icon) this.inject(el, icon);
       });
   }
 
@@ -185,7 +187,7 @@ export default class MaterialIconsPlugin extends Plugin {
     if (this.unloaded) return;
     const container = activeDocument.querySelector(".nav-files-container");
     if (!container) {
-      const timer = activeWindow.setTimeout(() => {
+      const timer = window.setTimeout(() => {
         this.retryTimers.delete(timer);
         this.startSafeObserver();
       }, 1000);
@@ -199,7 +201,7 @@ export default class MaterialIconsPlugin extends Plugin {
       if (!hasNewNodes) return;
       this.observer?.disconnect();
       this.scheduleApply();
-      const timer = activeWindow.setTimeout(() => {
+      const timer = window.setTimeout(() => {
         this.retryTimers.delete(timer);
         if (this.observer && container.isConnected) {
           this.observer.observe(container, { childList: true, subtree: true });
